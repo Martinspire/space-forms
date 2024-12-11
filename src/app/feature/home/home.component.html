@@ -1,0 +1,35 @@
+<div
+  class="flex flex-column justify-content-center align-content-center align-items-center"
+>
+  <div class="intro text-center">
+    <h1 class="text-4xl font-bold">Space Quiz</h1>
+    <p class="text-xl">
+      Lets find out who can answer most space questions correctly!
+    </p>
+  </div>
+  <img src="space-quiz-logo.jpg" alt="logo" />
+
+  @if (haveQuiz) {
+  <div
+    class="flex flex-column m-4 gap-2 justify-content-center align-content-center align-items-center"
+  >
+    <p-button
+      label="Signup"
+      icon="pi pi-user"
+      size="large"
+      (click)="signUp()"
+    ></p-button>
+  </div>
+  } @if (!haveQuiz) {
+  <div
+    class="flex flex-column m-4 gap-2 justify-content-center align-content-center align-items-center"
+  >
+    <p-button
+      label="Create a quiz"
+      icon="pi pi-user"
+      size="large"
+      [routerLink]="['/admin']"
+    ></p-button>
+  </div>
+  }
+</div>

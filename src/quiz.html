@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Client</title>
+  <script type="text/javascript" nonce="dbf5c67f8c9e463f85e00526214" src="//injections.adguard.org?ts=1733917836012&amp;type=content-script&amp;dmn=22204085-my.sharepoint.com&amp;url=https%3A%2F%2F22204085-my.sharepoint.com%2Fpersonal%2Fbart_verbeek_innspire_nl%2F_layouts%2F15%2Fdownload.aspx%3FUniqueId%3D70770d04-9302-4173-9443-a62bf8d0aa4e%26Translate%3Dfalse%26tempauth%3Dv1.eyJzaXRlaWQiOiJiMWQyOTI1NC00NzhkLTQ2Y2EtYjI2Mi0zZTA0NDNkNzY2MTAiLCJhcHBfZGlzcGxheW5hbWUiOiJNaWNyb3NvZnQgVGVhbXMiLCJhcHBpZCI6IjFmZWM4ZTc4LWJjZTQtNGFhZi1hYjFiLTU0NTFjYzM4NzI2NCIsImF1ZCI6IjAwMDAwMDAzLTAwMDAtMGZmMS1jZTAwLTAwMDAwMDAwMDAwMC8yMjIwNDA4NS1teS5zaGFyZXBvaW50LmNvbUA1ZDZmNmVmYy03ZWMwLTQ1MzQtYmU2OS1mYTdmNTYyZmE5MWEiLCJleHAiOiIxNzMzOTE5MjMwIn0.CgoKBHNuaWQSAjY0EgsI4szTstP5zD0QBRoNODEuMTcyLjIyOC4xMCosMWFKRm1qUzVSNG1SY1hQOTdMaGE0YjJ5KzI4Ti9oZ0hlc2FOM2pVc0RBaz0wnAE4AUIQoWx8wM8gAKDTPziSumdigUoQaGFzaGVkcHJvb2Z0b2tlblIIWyJrbXNpIl1yKTBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMmMyYzcwNzI2QGxpdmUuY29tegEyggESCfxub13AfjRFEb5p-n9WL6kakgEGTWFydGlumgEJU3BpZXJpbmdzogEcbWFydGluLnNwaWVyaW5nc0Bpbm5zcGlyZS5ubKoBEDEwMDMyMDAyQzJDNzA3MjayAVdjb250YWluZXIuc2VsZWN0ZWQgbXlmaWxlcy53cml0ZSBhbGxzaXRlcy5mdWxsY29udHJvbCBhbGxzaXRlcy5tYW5hZ2UgYWxscHJvZmlsZXMud3JpdGXIAQE.g_42Kxa8pQDj3biPpfQx1oh6CsNzfPGi4FdHyy4OI_4%26ApiVersion%3D2.0&amp;app=msedgewebview2.exe&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1&amp;stealth=1&amp;st-dnt"></script>
+<script type="text/javascript" nonce="dbf5c67f8c9e463f85e00526214" src="//injections.adguard.org?ts=1733917836012&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Popup%20Blocker&amp;type=user-script"></script><script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+
+<body>
+  <h1>Quiz App Socket.IO Client</h1>
+  <button onclick="startQuiz()">Start Quiz</button>
+  <button onclick="joinRoom()">Join Room</button>
+  <button onclick="submitAnswer()">Submit Answer</button>
+  <button onclick="nextQuestion()">Next Question</button>
+
+  <script>
+    const socket = io('http://localhost:3000'); // Replace with your server's address
+    let roomId = null;
+
+    socket.on('connect', () => {
+      console.log('Connected to server:', socket.id);
+    });
+
+    // Event: Player joined
+    socket.on('playerJoined', (data) => {
+      console.log('Player joined:', data);
+    });
+
+    // Event: Next question
+    socket.on('nextQuestion', (data) => {
+      console.log('Next question:', data.question);
+    });
+
+    // Event: Quiz ended
+    socket.on('quizEnded', (data) => {
+      console.log('Quiz ended. Answers:', data.answers);
+    });
+
+    // Start a new quiz
+    function startQuiz() {
+      const questions = ['What is 2+2?', 'What is the capital of France?'];
+      socket.emit('startQuiz', { questions }, (response) => {
+        if (response.success) {
+          roomId = response.roomId;
+          console.log('Quiz started. Room ID:', roomId);
+        } else {
+          console.error(response.message);
+        }
+      });
+    }
+
+    // Join a room
+    function joinRoom() {
+      if (!roomId) {
+        console.error('No room ID available. Start a quiz first.');
+        return;
+      }
+      const playerName = prompt('Enter your name:');
+      socket.emit('joinRoom', { playerName, roomId }, (response) => {
+        if (response.success) {
+          console.log('Joined room:', roomId);
+        } else {
+          console.error(response.message);
+        }
+      });
+    }
+
+    // Submit an answer
+    function submitAnswer() {
+      if (!roomId) {
+        console.error('No room ID available. Join a room first.');
+        return;
+      }
+      const answer = prompt('Enter your answer:');
+      socket.emit('submitAnswer', { roomId, answer }, (response) => {
+        if (response.success) {
+          console.log('Answer submitted:', answer);
+        } else {
+          console.error(response.message);
+        }
+      });
+    }
+
+    // Move to the next question
+    function nextQuestion() {
+      if (!roomId) {
+        console.error('No room ID available.');
+        return;
+      }
+      socket.emit('nextQuestion', { roomId }, (response) => {
+        if (response.success) {
+          console.log('Moved to the next question.');
+        } else {
+          console.error(response.message);
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>
